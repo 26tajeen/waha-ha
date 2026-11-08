@@ -1,17 +1,24 @@
 {
   "name": "WAHA (latest)",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "slug": "waha_latest",
   "description": "WAHA WhatsApp HTTP API with secure Home Assistant onboarding",
-  "build": true,
-  "arch": ["aarch64"],
+  "arch": [
+    "aarch64"
+  ],
   "startup": "application",
   "init": false,
   "boot": "auto",
-  "ports": {"3000": 3000},
-  "ports_description": {"3000": "WAHA Web UI and REST API"},
+  "ports": {
+    "3000": 3000
+  },
+  "ports_description": {
+    "3000": "WAHA Web UI and REST API"
+  },
   "webui": "http://[HOST]:[PORT:3000]/dashboard",
-  "map": ["data:rw"],
+  "map": [
+    "data:rw"
+  ],
   "options": {
     "api_key": "",
     "dashboard_username": "admin",
@@ -52,5 +59,6 @@
     "storage_contacts": "bool",
     "storage_message_secrets": "bool"
   },
-  "url": "https://waha.devlike.pro"
+  "url": "https://waha.devlike.pro",
+  "image": "ghcr.io/26tajeen/waha-ha-{arch}"
 }

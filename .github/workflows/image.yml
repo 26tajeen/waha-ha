@@ -1,0 +1,35 @@
+name: image
+on:
+  push:
+    branches: [main]
+    paths: [Dockerfile, prune.sh, run.sh, onboard.js, config.json, build.json, tests/**, .github/workflows/image.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  packages: write
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+      - name: Version and base from the app config
+        id: v
+        run: |
+          echo "version=$(jq -r .version config.json)" >> "$GITHUB_OUTPUT"
+          echo "base=$(jq -r .build_from.aarch64 build.json)" >> "$GITHUB_OUTPUT"
+          echo "image=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/waha-ha-aarch64" >> "$GITHUB_OUTPUT"
+      - name: Build
+        run: docker build --build-arg BUILD_FROM=${{ steps.v.outputs.base }} -t ${{ steps.v.outputs.image }}:${{ steps.v.outputs.version }} .
+      - name: Size
+        run: docker image ls ${{ steps.v.outputs.image }}
+      - name: Boot test
+        run: sh tests/boot.sh ${{ steps.v.outputs.image }}:${{ steps.v.outputs.version }}
+      - name: Refuse to overwrite a published version
+        run: |
+          if docker manifest inspect ${{ steps.v.outputs.image }}:${{ steps.v.outputs.version }} >/dev/null 2>&1; then
+            echo "${{ steps.v.outputs.version }} is already published; bump config.json version" >&2; exit 1
+          fi
+      - name: Push
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          docker push ${{ steps.v.outputs.image }}:${{ steps.v.outputs.version }}
