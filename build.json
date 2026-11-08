@@ -1,0 +1,5 @@
+{
+  "build_from": {
+    "aarch64": "devlikeapro/waha:gows-arm-2026.8.1"
+  }
+}
